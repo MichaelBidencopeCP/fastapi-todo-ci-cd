@@ -17,6 +17,10 @@ async def get_todos() -> list[TodoItem]:
     ]
     return todos 
 
+@router.post("/hello")
+async def say_hello():
+    return {"message": "testing CI/CD!"}
+
 #Hello this is a test to make sure the CI pipeline is working correctly.
 #This is the last test edit to verify the CI pipeline is functioning as expected.
 
