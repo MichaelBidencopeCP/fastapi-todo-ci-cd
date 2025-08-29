@@ -6,7 +6,7 @@ router = APIRouter()
 
 @router.get("/health")
 async def health_check():
-    return {"status": "not ok"}
+    return {"status": "ok"}
 
 @router.get("/todos")
 async def get_todos() -> list[TodoItem]:
