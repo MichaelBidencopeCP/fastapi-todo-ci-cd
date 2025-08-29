@@ -16,3 +16,4 @@ async def get_todos() -> list[TodoItem]:
         TodoItem(id=2, task="Build a simple app", completed=False, created_at="2023-10-02T12:00:00Z", updated_at="2023-10-02T12:00:00Z")
     ]
     return todos
+
