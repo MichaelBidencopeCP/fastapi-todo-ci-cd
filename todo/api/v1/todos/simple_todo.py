@@ -17,7 +17,7 @@ async def get_todos() -> list[TodoItem]:
     ]
     return todos 
 
-@router.post("/hello")
+@router.get("/hello")
 async def say_hello():
     return {"message": "testing CI/CD!"}
 
