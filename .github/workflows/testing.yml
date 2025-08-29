@@ -26,6 +26,7 @@ jobs:
   deploy:
     needs: testing
     runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     steps:
       - name: Deploy
         run: echo "Deploying application..."
