@@ -1,26 +1,61 @@
 from fastapi.routing import APIRouter
-from todo.api.v1.todos.schemas import TodoItem
+from fastapi import Depends, HTTPException, status
+from todo.api.v1.todos.schemas import TodoItem, TodoItemCreate, TodoItemUpdate
+from todo.database import get_db
+from sqlalchemy.ext.asyncio import AsyncSession
+from typing import Union
+from todo.crud import todo_crud
 
 router = APIRouter()
 
-
-@router.get("/health")
-async def health_check():
-    return {"status": "ok"}
-
 @router.get("/todos")
-async def get_todos() -> list[TodoItem]:
-    # This endpoint would normally return a list of todos
-    todos = [
-        TodoItem(id=1, task="Learn FastAPI", completed=False, created_at="2023-10-01T12:00:00Z", updated_at="2023-10-01T12:00:00Z"),
-        TodoItem(id=2, task="Build a simple app", completed=False, created_at="2023-10-02T12:00:00Z", updated_at="2023-10-02T12:00:00Z")
-    ]
-    return todos 
+@router.get("/todos/{todo_id}")
+async def get_todos(todo_id: Union[None, int] = None, db: AsyncSession = Depends(get_db)) -> list[TodoItem] : 
+    try:
+        if todo_id is None:
+            todos = await todo_crud.get_all(db)
+            return todos
+        else:
+            todo = await todo_crud.get(db, todo_id)
+            if todo is None:
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Todo item not found")
+            return [todo]
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
-@router.get("/hello")
-async def say_hello():
-    return {"message": "testing CI/CD!"}
+            
 
-#Hello this is a test to make sure the CI pipeline is working correctly.
-#This is the last test edit to verify the CI pipeline is functioning as expected.
 
+@router.post("/todos")
+async def create_todo(item: TodoItemCreate, db: AsyncSession = Depends(get_db)) -> TodoItem:
+    try:
+        todo = await todo_crud.create(db, item)
+        return todo
+    except Exception as e:
+        await db.rollback()
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+
+@router.put("/todos/{todo_id}")
+async def update_todo(todo_id: int, item: TodoItemUpdate, db: AsyncSession = Depends(get_db)) -> TodoItem:
+    ##may add authentication later
+    try:
+        existing_todo = await todo_crud.get(db, todo_id)
+        if existing_todo is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Todo item not found")
+        updated_todo = await todo_crud.update(db, todo_id, item)
+        return updated_todo
+    except Exception as e:
+        await db.rollback()
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+    
+@router.delete("/todos/{todo_id}")
+async def delete_todo(todo_id: int, db: AsyncSession = Depends(get_db)) -> TodoItem:
+    try:
+        existing_todo = await todo_crud.get(db, todo_id)
+        if existing_todo is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Todo item not found")
+        deleted_todo = await todo_crud.delete(db, todo_id)
+        return deleted_todo
+    except Exception as e:
+        await db.rollback()
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
