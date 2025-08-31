@@ -1,7 +1,11 @@
 import pytest
 from todo.crud import todo_crud
 from todo.api.v1.todos.schemas import TodoItemCreate, TodoItemUpdate, TodoItemResponse
+from todo.crud import auth_crud
+from todo.api.auth.schemas import UserCreate, UserInDB
 
+
+## todo_crud Tests
 async def test_create_todo(db_session):
     todo_data : TodoItemCreate = TodoItemCreate(title="Test Todo", description="This is a test todo item.")
     db = db_session
@@ -52,5 +56,30 @@ async def test_update_todo_not_found(db_session):
     update_data = TodoItemCreate(title="Non-existent", description="This todo does not exist.")
     updated_todo = await todo_crud.update(db, 9999, update_data)
     assert updated_todo is None
+
+## auth_crud Tests
+async def test_create_user(db_session):
+    db = db_session
+    user_data : UserCreate = UserCreate(username="testuser1", password="testpassword", is_superuser=False)
+    new_user: UserInDB = await auth_crud.create_user(db, user_data)
+    assert new_user.username == user_data.username
+    assert new_user.is_superuser == user_data.is_superuser
+    assert new_user.id is not None
+
+async def test_get_user(db_session):
+    db = db_session
+    user_data : UserCreate = UserCreate(username="anotheruser", password="anotherpassword", is_superuser=True)
+    created_user: UserInDB = await auth_crud.create_user(db, user_data)
+    fetched_user = await auth_crud.get_user(db, user_data.username)
+    assert fetched_user is not None
+    assert fetched_user.username == created_user.username
+    assert fetched_user.is_superuser == created_user.is_superuser
+    assert fetched_user.id == created_user.id
+    
+async def test_get_nonexistent_user(db_session):
+    db = db_session
+    user = await auth_crud.get_user(db, "nonexistentuser")
+    assert user is None
+
 
 

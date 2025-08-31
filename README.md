@@ -9,3 +9,4 @@ This is a small demo project built to practice **FastAPI**, **Pytest**, and **Gi
 - Unit tests with **pytest**
 - CI pipeline with GitHub Actions (runs tests on every push/PR)
 - CD workflow to deploy to AWS EC2
+- Authentication with JWT tokens
