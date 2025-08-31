@@ -10,3 +10,4 @@ This is a small demo project built to practice **FastAPI**, **Pytest**, and **Gi
 - CI pipeline with GitHub Actions (runs tests on every push/PR)
 - Dockerfile for containerization
 - CD workflow to deploy to AWS ECS
+- Authentication with JWT tokens

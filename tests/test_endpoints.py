@@ -1,5 +1,7 @@
+import warnings
 import pytest
 
+## todo_endpoints Tests
 async def test_create_endpoint(client):
     todo_data = {"title": "Test Todo", "description": "This is a test todo item."}
     resp = await client.post("/api/v1/todos", json=todo_data)
@@ -71,3 +73,42 @@ async def test_delete_endpoint(client):
     # Verify the item is actually deleted
     get_resp = await client.get(f"/api/v1/todos/{todo_id}")
     assert get_resp.status_code == 404
+
+##Auth Endpoints
+async def test_signup_endpoint(client):
+    user_data = {"username": "testuser", "password": "testpassword"}
+    resp = await client.post("/api/auth/signup", json=user_data)
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["username"] == user_data["username"]
+    assert "is_superuser" in data
+    assert data["is_superuser"] is False
+
+@pytest.mark.filterwarnings("ignore:.*crypt*")
+async def test_login_endpoint(client):
+    # First, create a user
+    user_data = {"username": "loginuser", "password": "loginpassword"}
+    await client.post("/api/auth/signup", json=user_data)
+    login_data = {"username": "loginuser", "password": "loginpassword"}
+    resp = await client.post("/api/auth/login", json=login_data)
+    assert resp.status_code == 200
+    data = resp.json()
+    assert "access_token" in data
+    assert data["token_type"] == "bearer"
+
+async def test_login_invalid_credentials(client):
+    login_data = {"username": "nonexistentuser", "password": "wrongpassword"}
+    resp = await client.post("/api/auth/login", json=login_data)
+    assert resp.status_code == 401
+    data = resp.json()
+    assert data["detail"] == "Incorrect username or password"
+
+async def test_signup_existing_username(client):
+    user_data = {"username": "existinguser", "password": "somepassword"}
+    await client.post("/api/auth/signup", json=user_data)
+    resp = await client.post("/api/auth/signup", json=user_data)
+    assert resp.status_code == 400
+    data = resp.json()
+    assert data["detail"] == "Username already registered"
+
+
