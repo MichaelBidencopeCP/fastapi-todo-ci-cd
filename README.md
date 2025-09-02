@@ -6,8 +6,7 @@ This is a small demo project built to practice **FastAPI**, **Pytest**, and **Gi
 
 ## Features
 - Simple FastAPI service todo app
-- Unit tests with **pytest** + **TestClient**
+- Unit tests with **pytest**
 - CI pipeline with GitHub Actions (runs tests on every push/PR)
-- Dockerfile for containerization
-- CD workflow to deploy to AWS ECS
+- CD workflow to deploy to AWS EC2
 - Authentication with JWT tokens
