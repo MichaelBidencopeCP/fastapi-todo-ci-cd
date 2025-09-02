@@ -3,8 +3,6 @@ from todo.api.auth.schemas import UserCreate, UserInDB
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
-
-
 async def get_user(db:AsyncSession, username: str) -> UserInDB | None:
     
     db_user = await db.execute(

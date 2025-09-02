@@ -46,6 +46,11 @@ async def test_delete_todo(db_session):
     assert deleted_todo.id == todo_item.id
     assert await todo_crud.get(db, todo_item.id) is None
 
+async def test_fail_delete_todo(db_session):
+    db = db_session
+    deleted_todo = await todo_crud.delete(db, 9999)
+    assert deleted_todo is None
+
 async def test_get_todo_not_found(db_session):
     db = db_session
     todo = await todo_crud.get(db, 9999)
@@ -66,6 +71,13 @@ async def test_create_user(db_session):
     assert new_user.is_superuser == user_data.is_superuser
     assert new_user.id is not None
 
+async def test_fail_create_user_duplicate_username(db_session):
+    db = db_session
+    user_data : UserCreate = UserCreate(username="duplicateuser", password="password1", is_superuser=False)
+    await auth_crud.create_user(db, user_data)
+    with pytest.raises(Exception):
+        await auth_crud.create_user(db, user_data)
+
 async def test_get_user(db_session):
     db = db_session
     user_data : UserCreate = UserCreate(username="anotheruser", password="anotherpassword", is_superuser=True)
@@ -75,11 +87,8 @@ async def test_get_user(db_session):
     assert fetched_user.username == created_user.username
     assert fetched_user.is_superuser == created_user.is_superuser
     assert fetched_user.id == created_user.id
-    
+
 async def test_get_nonexistent_user(db_session):
     db = db_session
     user = await auth_crud.get_user(db, "nonexistentuser")
     assert user is None
-
-
-

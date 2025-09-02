@@ -1,4 +1,3 @@
-import warnings
 import pytest
 
 ## todo_endpoints Tests
@@ -84,7 +83,6 @@ async def test_signup_endpoint(client):
     assert "is_superuser" in data
     assert data["is_superuser"] is False
 
-@pytest.mark.filterwarnings("ignore:.*crypt*")
 async def test_login_endpoint(client):
     # First, create a user
     user_data = {"username": "loginuser", "password": "loginpassword"}
@@ -95,6 +93,8 @@ async def test_login_endpoint(client):
     data = resp.json()
     assert "access_token" in data
     assert data["token_type"] == "bearer"
+
+
 
 async def test_login_invalid_credentials(client):
     login_data = {"username": "nonexistentuser", "password": "wrongpassword"}
@@ -110,5 +110,4 @@ async def test_signup_existing_username(client):
     assert resp.status_code == 400
     data = resp.json()
     assert data["detail"] == "Username already registered"
-
 
